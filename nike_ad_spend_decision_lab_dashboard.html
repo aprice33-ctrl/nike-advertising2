@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nike Advertising Spend & Shareholder Value Dashboard</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#171a1f; --muted:#5f6b7a; --line:#e5e8ee;
+    --accent:#111827; --good:#0f766e; --warn:#b45309; --bad:#b91c1c; --soft:#eef2ff; --blue:#2563eb;
+  }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,"Segoe UI", sans-serif;}
+  header{background:linear-gradient(135deg,#0f172a 0%,#111827 58%,#1f2937 100%);color:white;padding:42px 5vw 36px;border-bottom:1px solid #0b1220;}
+  header .label{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 12px;font-size:13px;color:#e5e7eb;background:rgba(255,255,255,.06)}
+  h1{font-size:clamp(32px,5vw,58px);letter-spacing:-.05em;line-height:.95;margin:18px 0 14px;max-width:1000px}
+  .sub{font-size:18px;line-height:1.55;max-width:960px;color:#d1d5db;margin:0}
+  .sourcebar{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.sourcebar a{color:white;text-decoration:none;border:1px solid rgba(255,255,255,.24);border-radius:12px;padding:10px 14px;background:rgba(255,255,255,.08);font-size:14px}.sourcebar a:hover{background:rgba(255,255,255,.16)}
+  main{padding:28px 5vw 56px}.grid{display:grid;gap:18px}.topgrid{grid-template-columns:1.2fr .8fr}.cards{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 10px 28px rgba(15,23,42,.05)}
+  .card{padding:20px}.card .k{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}.card .v{font-size:31px;font-weight:800;margin-top:8px;letter-spacing:-.04em}.card .d{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.35}.panel{padding:24px}.panel h2{margin:0 0 6px;font-size:24px;letter-spacing:-.03em}.panel p{color:var(--muted);line-height:1.55;margin:8px 0}.small{font-size:13px;color:var(--muted)}
+  .chain{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:18px}.step{background:#f9fafb;border:1px solid var(--line);border-radius:18px;padding:16px;position:relative;min-height:124px;cursor:pointer;transition:.18s}.step:hover{transform:translateY(-2px);border-color:#cbd5e1;box-shadow:0 12px 24px rgba(15,23,42,.07)}.step.active{background:#eff6ff;border-color:#93c5fd}.step b{font-size:15px;display:block}.step span{display:block;font-size:13px;color:var(--muted);margin-top:7px;line-height:1.35}.step .bubble{position:absolute;right:12px;bottom:12px;background:#111827;color:white;border-radius:999px;font-size:12px;padding:5px 8px}
+  .detailBox{margin-top:14px;background:#f8fafc;border:1px solid var(--line);border-radius:18px;padding:16px;font-size:15px;line-height:1.55}.detailBox b{color:#111827}.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}.sliders{display:grid;gap:18px}.control{padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfdff}.control label{display:flex;justify-content:space-between;font-size:14px;font-weight:700}.control input{width:100%;margin-top:12px;accent-color:#111827}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:750}.green{background:#ecfdf5;color:#065f46}.orange{background:#fff7ed;color:#9a3412}.red{background:#fef2f2;color:#991b1b}.blue{background:#eff6ff;color:#1d4ed8}.resultRow{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--line)}.resultRow:last-child{border-bottom:none}.resultRow .num{font-weight:800}.bigResult{font-size:44px;font-weight:900;letter-spacing:-.06em;margin:8px 0 2px}.meter{height:13px;background:#eef2f7;border-radius:999px;overflow:hidden;margin:12px 0}.meter>div{height:100%;background:#111827;width:50%;transition:.3s}
+  .scenarioBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.scenarioBtns button,.primaryBtn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 12px;font-weight:800;cursor:pointer}.scenarioBtns button:hover,.primaryBtn:hover{background:#f8fafc}.primaryBtn{background:#111827;color:white;border-color:#111827}.primaryBtn:hover{background:#1f2937}
+  .chartWrap{width:100%;height:280px;border:1px solid var(--line);border-radius:18px;background:#fff;padding:12px}.chartWrap svg{width:100%;height:100%;overflow:visible}.axis{stroke:#cbd5e1;stroke-width:1}.line{fill:none;stroke:#111827;stroke-width:3}.line2{fill:none;stroke:#64748b;stroke-width:3;stroke-dasharray:6 5}.dot{fill:#111827}.dot2{fill:#64748b}.bar{fill:#111827}.bar2{fill:#d1d5db}.chartText{font-size:11px;fill:#64748b}.table{width:100%;border-collapse:collapse;font-size:14px}.table th,.table td{text-align:left;border-bottom:1px solid var(--line);padding:11px 8px}.table th{color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.note{border-left:4px solid #111827;background:#f8fafc;padding:14px 16px;border-radius:12px;margin-top:14px;color:#475569;line-height:1.55}.recommend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.rec{padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfdff}.rec h3{margin:0 0 8px;font-size:16px}.rec p{font-size:14px;margin:0;color:var(--muted)}
+  footer{padding:24px 5vw 44px;color:#64748b;font-size:13px;line-height:1.5}.tooltip{font-size:12px;color:#64748b;margin-top:8px}.hidden{display:none}
+
+  .labGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px}.miniCards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{border:1px solid var(--line);border-radius:18px;background:#fbfdff;padding:16px}.mini .label{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}.mini .metric{font-size:28px;font-weight:900;letter-spacing:-.04em;margin-top:6px}.decisionBox{border:1px solid var(--line);border-radius:20px;background:#fbfdff;padding:18px;margin-top:14px}.segSelect{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font:inherit;background:white}.campaignBars{display:grid;gap:12px}.mixRow{display:grid;grid-template-columns:150px 1fr 54px;gap:10px;align-items:center;font-size:14px}.mixRow input{accent-color:#111827}.matrix{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.matrix .cell{border:1px solid var(--line);border-radius:16px;padding:14px;background:white}.cell b{display:block;margin-bottom:5px}.statusLine{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:12px 0}.statusLine:last-child{border-bottom:none}.sourceLink{display:inline-flex;text-decoration:none;color:#111827;border:1px solid var(--line);border-radius:14px;padding:11px 13px;font-weight:800;background:#fff}.sourceLink:hover{background:#f8fafc}.toggleBtns{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.toggleBtns button{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 12px;font-weight:800;cursor:pointer}.toggleBtns button.active{background:#111827;color:white;border-color:#111827}.plainList{margin:10px 0 0;padding-left:18px;color:var(--muted);line-height:1.55}.plainList li{margin:6px 0}
+  @media(max-width:1000px){.labGrid{grid-template-columns:1fr}.miniCards{grid-template-columns:1fr}.matrix{grid-template-columns:1fr}.mixRow{grid-template-columns:1fr}}
+
+  @media(max-width:1000px){.topgrid,.cols{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}.chain{grid-template-columns:1fr}.recommend{grid-template-columns:1fr}.scenarioBtns{grid-template-columns:1fr}}
+  @media(max-width:600px){.cards{grid-template-columns:1fr} header{padding-top:30px}.card .v{font-size:26px}.bigResult{font-size:34px}}
+
+  .assistantWrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px;align-items:stretch}.chatBox{border:1px solid var(--line);border-radius:20px;background:#fbfdff;min-height:360px;display:flex;flex-direction:column;overflow:hidden}.chatMessages{padding:16px;display:flex;flex-direction:column;gap:12px;overflow:auto;max-height:360px}.msg{max-width:88%;padding:12px 14px;border-radius:16px;line-height:1.45;font-size:14px}.msg.user{align-self:flex-end;background:#111827;color:white;border-bottom-right-radius:5px}.msg.bot{align-self:flex-start;background:white;border:1px solid var(--line);color:#243041;border-bottom-left-radius:5px}.chatInput{display:flex;gap:10px;padding:12px;border-top:1px solid var(--line);background:white}.chatInput input{flex:1;border:1px solid var(--line);border-radius:14px;padding:13px 14px;font:inherit}.chatInput button{border:0;border-radius:14px;background:#111827;color:white;font-weight:800;padding:0 16px;cursor:pointer}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.chip{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 11px;font-size:13px;font-weight:750;cursor:pointer}.chip:hover{background:#f8fafc}.botCard{padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff;margin-top:12px}.botCard b{display:block;margin-bottom:4px}
+  @media(max-width:1000px){.assistantWrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="label">Interactive case study • Nike FY2023–FY2025</div>
+  <h1>Does more advertising create shareholder value?</h1>
+  <p class="sub">A customer-friendly financial dashboard using Nike’s real reported results. The point is simple: advertising is valuable only when it turns into demand, profit, and cash that can eventually support dividends and stockholder value.</p>
+  <div class="sourcebar">
+    <a href="https://www.sec.gov/Archives/edgar/data/320187/000032018725000047/nke-20250531.htm" target="_blank">Open live SEC 2025 10-K ↗</a>
+    <a href="https://investors.nike.com/investors/news-events-and-reports/investor-news/investor-news-details/2025/NIKE-Inc--Reports-Fiscal-2025-Fourth-Quarter-and-Full-Year-Results/default.aspx" target="_blank">Open Nike FY2025 results ↗</a>
+    <a href="#sources">See data notes</a>
+  </div>
+</header>
+<main>
+  <section class="grid cards" id="summaryCards"></section>
+
+  <section class="grid topgrid" style="margin-top:18px;align-items:stretch">
+    <div class="panel">
+      <h2>The viewer story</h2>
+      <p>Click each step to see the plain-English business logic. This replaces the formula-heavy view with a customer-facing story.</p>
+      <div class="chain" id="chain"></div>
+      <div class="detailBox" id="chainDetail"></div>
+    </div>
+    <div class="panel">
+      <h2>2025 readout</h2>
+      <p>Nike spent more on demand creation in FY2025, but revenue and profit fell. That does not mean advertising “failed” by itself; it means leadership should evaluate whether incremental spend is creating profitable demand fast enough.</p>
+      <div class="bigResult" id="valueScore">—</div>
+      <span class="pill" id="scorePill">Loading</span>
+      <div class="meter"><div id="scoreMeter"></div></div>
+      <div class="note" id="scoreNote"></div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>Interactive what-if simulator</h2>
+    <p>Move the sliders as if you are a brand manager deciding whether extra advertising is financially justified. The model keeps the math behind the scenes and shows the business result.</p>
+    <div class="scenarioBtns">
+      <button onclick="setScenario('conservative')">Conservative brand support</button>
+      <button onclick="setScenario('balanced')">Balanced growth push</button>
+      <button onclick="setScenario('aggressive')">Aggressive comeback campaign</button>
+    </div>
+    <div class="cols">
+      <div class="sliders">
+        <div class="control"><label>Extra advertising spend <span id="spendVal">$500M</span></label><input type="range" min="0" max="2500" step="50" value="500" id="extraSpend"></div>
+        <div class="control"><label>Sales lift from stronger demand <span id="salesLiftVal">3.0%</span></label><input type="range" min="-3" max="12" step="0.25" value="3" id="salesLift"></div>
+        <div class="control"><label>Margin effect from better targeting/pricing <span id="marginVal">0.5 pts</span></label><input type="range" min="-3" max="4" step="0.1" value="0.5" id="marginEffect"></div>
+        <div class="control"><label>Dividend payout posture <span id="payoutVal">Keep recent payout style</span></label><input type="range" min="35" max="85" step="1" value="73" id="payout"></div>
+      </div>
+      <div>
+        <div class="resultRow"><span>Projected revenue</span><span class="num" id="projRevenue"></span></div>
+        <div class="resultRow"><span>Projected net income</span><span class="num" id="projIncome"></span></div>
+        <div class="resultRow"><span>Estimated ROE</span><span class="num" id="projRoe"></span></div>
+        <div class="resultRow"><span>Possible dividends supported</span><span class="num" id="projDiv"></span></div>
+        <div class="resultRow"><span>Incremental profit after extra ad spend</span><span class="num" id="incProfit"></span></div>
+        <div class="note" id="simAdvice"></div>
+        <button class="primaryBtn" style="margin-top:12px;width:100%" onclick="copySummary()">Copy executive summary</button>
+        <div class="tooltip" id="copyNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid cols" style="margin-top:18px">
+    <div class="panel">
+      <h2>Real data trend</h2>
+      <p>The key visual: Nike increased demand creation spending in 2025 while revenue and net income declined.</p>
+      <div class="chartWrap"><svg id="trendChart" viewBox="0 0 620 280"></svg></div>
+    </div>
+    <div class="panel">
+      <h2>Efficiency check</h2>
+      <p>This is the “customer view” of marketing productivity: how much sales and profit the company generated for each advertising dollar.</p>
+      <div class="chartWrap"><svg id="effChart" viewBox="0 0 620 280"></svg></div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>Decision guidance for companies in the same sector</h2>
+    <div class="recommend">
+      <div class="rec"><h3>1. Spend more only with a clear return target</h3><p>In footwear and apparel, brand investment matters, but extra spend should be linked to measurable demand: traffic, conversion, sell-through, and margin quality.</p></div>
+      <div class="rec"><h3>2. Protect margin while chasing growth</h3><p>Advertising that requires heavy discounts can lift short-term sales but weaken profit. The best campaigns increase demand without training customers to wait for sales.</p></div>
+      <div class="rec"><h3>3. Tie marketing to shareholder outcomes</h3><p>Leadership should report whether campaigns are improving revenue, profitability, and cash available for dividends or buybacks—not just impressions and brand awareness.</p></div>
+    </div>
+  </section>
+
+
+  <section class="panel" style="margin-top:18px" id="decisionLab">
+    <h2>Decision lab: should a company spend more?</h2>
+    <p>This replaces the repetitive assistant with tools a customer can actually use. Each module turns the Nike case into an entry-level financial decision.</p>
+    <div class="toggleBtns">
+      <button class="active" onclick="showLab('breakEven', this)">Break-even test</button>
+      <button onclick="showLab('mix', this)">Campaign mix planner</button>
+      <button onclick="showLab('sector', this)">Sector advice</button>
+      <button onclick="showLab('evidence', this)">Evidence snapshot</button>
+    </div>
+
+    <div id="breakEven" class="labPanel">
+      <div class="labGrid">
+        <div>
+          <h3>How much sales lift is needed just to justify the extra spend?</h3>
+          <p class="small">Use this when leadership asks: “If we add budget, how much more revenue does the campaign need to create before it is worth it?”</p>
+          <div class="sliders">
+            <div class="control"><label>Added advertising budget <span id="beSpendVal">$500M</span></label><input type="range" min="50" max="2500" step="50" value="500" id="beSpend"></div>
+            <div class="control"><label>Expected profit quality <span id="beMarginVal">8.0%</span></label><input type="range" min="2" max="18" step="0.5" value="8" id="beMargin"></div>
+            <div class="control"><label>Confidence in campaign execution <span id="beConfidenceVal">Medium</span></label><input type="range" min="1" max="3" step="1" value="2" id="beConfidence"></div>
+          </div>
+        </div>
+        <div>
+          <div class="miniCards">
+            <div class="mini"><div class="label">Required sales lift</div><div class="metric" id="beLift">—</div></div>
+            <div class="mini"><div class="label">Required new sales</div><div class="metric" id="beSales">—</div></div>
+            <div class="mini"><div class="label">Decision</div><div class="metric" id="beDecision">—</div></div>
+          </div>
+          <div class="note" id="beAdvice"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mix" class="labPanel hidden">
+      <div class="labGrid">
+        <div>
+          <h3>Build a marketing plan</h3>
+          <p class="small">Not all advertising dollars are equal. A healthy plan balances brand strength, conversion, and margin discipline.</p>
+          <div class="campaignBars">
+            <div class="mixRow"><b>Brand building</b><input type="range" min="0" max="100" value="35" id="brandMix"><span id="brandMixVal">35%</span></div>
+            <div class="mixRow"><b>Performance ads</b><input type="range" min="0" max="100" value="30" id="perfMix"><span id="perfMixVal">30%</span></div>
+            <div class="mixRow"><b>Retail/events</b><input type="range" min="0" max="100" value="20" id="retailMix"><span id="retailMixVal">20%</span></div>
+            <div class="mixRow"><b>Discount push</b><input type="range" min="0" max="100" value="15" id="discMix"><span id="discMixVal">15%</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="bigResult" id="mixScore">—</div>
+          <span class="pill" id="mixPill">Loading</span>
+          <div class="meter"><div id="mixMeter"></div></div>
+          <div class="matrix">
+            <div class="cell"><b>Customer effect</b><span id="customerEffect" class="small"></span></div>
+            <div class="cell"><b>Financial effect</b><span id="financialEffect" class="small"></span></div>
+            <div class="cell"><b>Main risk</b><span id="mainRisk" class="small"></span></div>
+            <div class="cell"><b>Best next action</b><span id="nextAction" class="small"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="sector" class="labPanel hidden">
+      <div class="labGrid">
+        <div>
+          <h3>Advice by company type</h3>
+          <p class="small">A premium athletic brand should not use the same advertising logic as a mass-market apparel company or turnaround brand.</p>
+          <select id="sectorType" class="segSelect" onchange="updateSectorAdvice()">
+            <option value="premium">Premium athletic brand</option>
+            <option value="mass">Mass-market apparel company</option>
+            <option value="dtc">Direct-to-consumer growth brand</option>
+            <option value="turnaround">Turnaround / declining sales brand</option>
+          </select>
+          <div class="note" id="sectorAdvice"></div>
+        </div>
+        <div>
+          <h3>Management checklist</h3>
+          <ul class="plainList" id="sectorChecklist"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="evidence" class="labPanel hidden">
+      <div class="labGrid">
+        <div>
+          <h3>What the Nike case says</h3>
+          <div class="statusLine"><span>Demand creation spend</span><b id="evDemand">—</b></div>
+          <div class="statusLine"><span>Revenue</span><b id="evRevenue">—</b></div>
+          <div class="statusLine"><span>Net income</span><b id="evIncome">—</b></div>
+          <div class="statusLine"><span>Dividend pressure</span><b id="evDividend">—</b></div>
+        </div>
+        <div>
+          <h3>Customer-facing conclusion</h3>
+          <p class="note">The Nike case is useful because it is not a simple “more ads = more value” story. In FY2025, demand creation expense increased while sales and profit declined. For companies in the same sector, the right advice is selective investment: fund campaigns that protect brand strength, improve full-price demand, and produce cash—not campaigns that only buy short-term attention.</p>
+          <a class="sourceLink" href="https://www.sec.gov/Archives/edgar/data/320187/000032018725000047/nke-20250531.htm" target="_blank">Open source filing ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:18px" id="sources">
+    <h2>Data used</h2>
+    <table class="table">
+      <thead><tr><th>Fiscal year</th><th>Revenue</th><th>Demand creation expense</th><th>Net income</th><th>Total assets</th><th>Equity</th><th>Dividends</th></tr></thead>
+      <tbody id="dataTable"></tbody>
+    </table>
+    <p class="small">All dollar figures are in millions. Demand creation expense is Nike’s reported category for brand marketing and sports marketing, including advertising and promotional costs. This dashboard is educational and directional; it is not investment advice.</p>
+  </section>
+</main>
+<footer>
+  Built as a single-file HTML dashboard. Sources: Nike FY2025 Form 10-K and Nike investor results page. Course framing: Finance 3010 review concepts including ratio analysis, asset turnover, profitability, market value, DuPont Identity, and cash flow to stockholders.
+</footer>
+<script>
+const data = [
+  {year:2023, revenue:51217, demand:4060, income:5070, assets:37531, equity:14004, dividends:2059},
+  {year:2024, revenue:51362, demand:4285, income:5700, assets:38110, equity:14430, dividends:2203},
+  {year:2025, revenue:46309, demand:4689, income:3219, assets:36579, equity:13213, dividends:2337}
+];
+const base = data[2];
+const fmt = n => '$' + Math.round(n).toLocaleString() + 'M';
+const pct = n => (n*100).toFixed(1) + '%';
+const one = n => n.toFixed(1);
+function metricCards(){
+  const revChange=(base.revenue-data[1].revenue)/data[1].revenue;
+  const demandChange=(base.demand-data[1].demand)/data[1].demand;
+  const incomeChange=(base.income-data[1].income)/data[1].income;
+  const roe=base.income/base.equity;
+  const cards=[
+    ['FY2025 revenue', fmt(base.revenue), `${pct(revChange)} vs FY2024`, revChange>=0?'green':'red'],
+    ['Demand creation spend', fmt(base.demand), `${pct(demandChange)} vs FY2024`, demandChange>=0?'orange':'green'],
+    ['Net income', fmt(base.income), `${pct(incomeChange)} vs FY2024`, incomeChange>=0?'green':'red'],
+    ['Return on equity', pct(roe), 'Profit returned relative to shareholder equity', 'blue']
+  ];
+  document.getElementById('summaryCards').innerHTML=cards.map(c=>`<div class="card"><div class="k">${c[0]}</div><div class="v">${c[1]}</div><div class="d"><span class="pill ${c[3]}">${c[2]}</span></div></div>`).join('');
+}
+const steps=[
+ {t:'Advertising investment',s:'The company spends to create demand.',b:'Nike calls this demand creation expense. In FY2025, it rose to $4.689B.'},
+ {t:'Customer demand',s:'More people notice, consider, and buy.',b:'This is where the marketing team must prove the spend is working: traffic, conversion, full-price sell-through, and repeat buying.'},
+ {t:'Revenue growth',s:'Demand turns into sales.',b:'In FY2025, revenue fell 10%, so extra spending did not yet show up as top-line growth.'},
+ {t:'Profit quality',s:'Sales must be profitable, not just bigger.',b:'If marketing depends on discounting, it can weaken margin. If it strengthens brand preference, it can protect pricing.'},
+ {t:'Shareholder value',s:'Profit and cash support dividends and valuation.',b:'Nike still raised dividends in FY2025, but lower earnings made the payout heavier. That is a warning sign for future spending discipline.'}
+];
+function buildChain(){
+ const el=document.getElementById('chain');
+ el.innerHTML=steps.map((x,i)=>`<div class="step ${i==0?'active':''}" onclick="selectStep(${i})"><b>${x.t}</b><span>${x.s}</span><div class="bubble">${i+1}</div></div>`).join('');
+ selectStep(0);
+}
+function selectStep(i){
+ document.querySelectorAll('.step').forEach((e,j)=>e.classList.toggle('active',j===i));
+ document.getElementById('chainDetail').innerHTML=`<b>${steps[i].t}:</b> ${steps[i].b}`;
+}
+function score(){
+ const rev=(base.revenue-data[1].revenue)/data[1].revenue;
+ const inc=(base.income-data[1].income)/data[1].income;
+ const d=(base.demand-data[1].demand)/data[1].demand;
+ let score=50 + rev*180 + inc*80 - Math.max(d,0)*40;
+ score=Math.max(8,Math.min(92,score));
+ document.getElementById('valueScore').textContent=Math.round(score)+'/100';
+ document.getElementById('scoreMeter').style.width=score+'%';
+ const pill=document.getElementById('scorePill');
+ if(score>=70){pill.className='pill green';pill.textContent='Strong case to scale';}
+ else if(score>=45){pill.className='pill orange';pill.textContent='Proceed selectively';}
+ else{pill.className='pill red';pill.textContent='Needs proof before scaling';}
+ document.getElementById('scoreNote').innerHTML='Customer-friendly takeaway: <b>do not just spend more.</b> Spend more only where the company can prove the campaign brings profitable demand, protects pricing, and improves cash generation.';
+}
+function updateSim(){
+ const extra=+document.getElementById('extraSpend').value;
+ const salesLift=+document.getElementById('salesLift').value/100;
+ const marginEff=+document.getElementById('marginEffect').value/100;
+ const payout=+document.getElementById('payout').value/100;
+ document.getElementById('spendVal').textContent=fmt(extra);
+ document.getElementById('salesLiftVal').textContent=(salesLift*100).toFixed(1)+'%';
+ document.getElementById('marginVal').textContent=(marginEff*100).toFixed(1)+' pts';
+ document.getElementById('payoutVal').textContent=Math.round(payout*100)+'% payout';
+ const baseMargin=base.income/base.revenue;
+ const newRevenue=base.revenue*(1+salesLift);
+ const newMargin=Math.max(.01,baseMargin+marginEff);
+ const newIncomeBeforeExtra=newRevenue*newMargin;
+ const newIncome=newIncomeBeforeExtra-extra;
+ const roe=newIncome/base.equity;
+ const dividends=Math.max(0,newIncome*payout);
+ const incProfit=newIncome-base.income;
+ document.getElementById('projRevenue').textContent=fmt(newRevenue);
+ document.getElementById('projIncome').textContent=fmt(newIncome);
+ document.getElementById('projRoe').textContent=pct(roe);
+ document.getElementById('projDiv').textContent=fmt(dividends);
+ const incEl=document.getElementById('incProfit'); incEl.textContent=(incProfit>=0?'+':'')+fmt(incProfit).replace('$-','-$'); incEl.style.color=incProfit>=0?'#0f766e':'#b91c1c';
+ let advice='';
+ if(incProfit>extra*.25) advice='This scenario looks financially attractive: the added demand and margin improvement more than justify the extra campaign cost.';
+ else if(incProfit>0) advice='This scenario is positive but not a slam dunk. Management should test in priority categories before scaling companywide.';
+ else advice='This scenario destroys value: the advertising lift is not strong enough to cover the added spend. Improve targeting, reduce discounting, or delay the campaign.';
+ document.getElementById('simAdvice').textContent=advice;
+ drawTrend(newRevenue,newIncome); drawEff(newRevenue,newIncome,extra);
+}
+function setScenario(s){
+ const vals={conservative:[250,1.5,.2,65],balanced:[650,4,.8,65],aggressive:[1600,8,1.2,55]}[s];
+ ['extraSpend','salesLift','marginEffect','payout'].forEach((id,i)=>document.getElementById(id).value=vals[i]); updateSim();
+}
+function drawTrend(projRev,projInc){
+ const svg=document.getElementById('trendChart'), W=620,H=280,p=42; svg.innerHTML='';
+ const allRev=[...data.map(d=>d.revenue),projRev], allInc=[...data.map(d=>d.income),projInc];
+ const max=Math.max(...allRev)*1.08, min=0;
+ const x=i=>p+i*((W-2*p)/3), y=v=>H-p-((v-min)/(max-min))*(H-2*p);
+ svg.insertAdjacentHTML('beforeend',`<line class="axis" x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}"/><line class="axis" x1="${p}" y1="${p}" x2="${p}" y2="${H-p}"/>`);
+ const line=(arr,cls)=>arr.map((v,i)=>(i?'L':'M')+x(i)+' '+y(v)).join(' ');
+ svg.insertAdjacentHTML('beforeend',`<path class="line" d="${line(allRev,'line')}"/><path class="line2" d="${line(allInc,'line2')}"/>`);
+ ['2023','2024','2025','What-if'].forEach((t,i)=>svg.insertAdjacentHTML('beforeend',`<text class="chartText" x="${x(i)-16}" y="${H-16}">${t}</text>`));
+ allRev.forEach((v,i)=>svg.insertAdjacentHTML('beforeend',`<circle class="dot" cx="${x(i)}" cy="${y(v)}" r="5"/><text class="chartText" x="${x(i)-20}" y="${y(v)-10}">${Math.round(v/1000)}B</text>`));
+ allInc.forEach((v,i)=>svg.insertAdjacentHTML('beforeend',`<circle class="dot2" cx="${x(i)}" cy="${y(v)}" r="5"/><text class="chartText" x="${x(i)+6}" y="${y(v)+4}">${(v/1000).toFixed(1)}B</text>`));
+ svg.insertAdjacentHTML('beforeend',`<text class="chartText" x="${W-152}" y="24">Revenue = dark line</text><text class="chartText" x="${W-152}" y="42">Net income = gray line</text>`);
+}
+function drawEff(projRev,projInc,extra){
+ const svg=document.getElementById('effChart'), W=620,H=280,p=44; svg.innerHTML='';
+ const rows=[...data.map(d=>({label:d.year, sales:d.revenue/d.demand, profit:d.income/d.demand})), {label:'What-if', sales:projRev/(base.demand+extra), profit:projInc/(base.demand+extra)}];
+ const max=Math.max(...rows.flatMap(r=>[r.sales,r.profit]))*1.15;
+ const barW=42, group=(W-2*p)/4;
+ svg.insertAdjacentHTML('beforeend',`<line class="axis" x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}"/><line class="axis" x1="${p}" y1="${p}" x2="${p}" y2="${H-p}"/>`);
+ rows.forEach((r,i)=>{
+   const gx=p+i*group+30; const h1=(r.sales/max)*(H-2*p), h2=(r.profit/max)*(H-2*p);
+   svg.insertAdjacentHTML('beforeend',`<rect class="bar" x="${gx}" y="${H-p-h1}" width="${barW}" height="${h1}" rx="6"/><rect class="bar2" x="${gx+barW+8}" y="${H-p-h2}" width="${barW}" height="${h2}" rx="6"/><text class="chartText" x="${gx-4}" y="${H-16}">${r.label}</text><text class="chartText" x="${gx-2}" y="${H-p-h1-8}">${r.sales.toFixed(1)}x</text><text class="chartText" x="${gx+barW+8}" y="${H-p-h2-8}">${r.profit.toFixed(1)}x</text>`);
+ });
+ svg.insertAdjacentHTML('beforeend',`<text class="chartText" x="${W-210}" y="24">Dark: sales per ad dollar</text><text class="chartText" x="${W-210}" y="42">Light: profit per ad dollar</text>`);
+}
+function fillTable(){
+ document.getElementById('dataTable').innerHTML=data.map(d=>`<tr><td>${d.year}</td><td>${fmt(d.revenue)}</td><td>${fmt(d.demand)}</td><td>${fmt(d.income)}</td><td>${fmt(d.assets)}</td><td>${fmt(d.equity)}</td><td>${fmt(d.dividends)}</td></tr>`).join('');
+}
+
+function showLab(id, btn){
+ document.querySelectorAll('.labPanel').forEach(p=>p.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ document.querySelectorAll('.toggleBtns button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+}
+function updateBreakEven(){
+ const spend=+document.getElementById('beSpend').value;
+ const margin=+document.getElementById('beMargin').value/100;
+ const conf=+document.getElementById('beConfidence').value;
+ const confidenceLabel=['Low','Medium','High'][conf-1];
+ const requiredSales=spend/margin;
+ const requiredLift=requiredSales/base.revenue;
+ document.getElementById('beSpendVal').textContent=fmt(spend);
+ document.getElementById('beMarginVal').textContent=(margin*100).toFixed(1)+'%';
+ document.getElementById('beConfidenceVal').textContent=confidenceLabel;
+ document.getElementById('beLift').textContent=(requiredLift*100).toFixed(1)+'%';
+ document.getElementById('beSales').textContent=fmt(requiredSales);
+ const decision=document.getElementById('beDecision');
+ if(requiredLift<.025 && conf>=2){decision.textContent='Green'; decision.style.color='#0f766e';}
+ else if(requiredLift<.07){decision.textContent='Test'; decision.style.color='#b45309';}
+ else{decision.textContent='Pause'; decision.style.color='#b91c1c';}
+ document.getElementById('beAdvice').innerHTML = requiredLift<.025 ? 'This looks achievable if the campaign is aimed at high-intent customers and does not rely on deep discounting.' : requiredLift<.07 ? 'This is possible, but it should be tested in priority products or regions before the company commits a full national budget.' : 'This requires a large sales response just to break even. A company should improve targeting, creative quality, or pricing strategy before scaling.';
+}
+function updateMix(){
+ const ids=['brandMix','perfMix','retailMix','discMix'];
+ const vals=ids.map(id=>+document.getElementById(id).value);
+ const total=vals.reduce((a,b)=>a+b,0)||1;
+ const [brand,perf,retail,disc]=vals.map(v=>v/total*100);
+ ['brandMixVal','perfMixVal','retailMixVal','discMixVal'].forEach((id,i)=>document.getElementById(id).textContent=Math.round([brand,perf,retail,disc][i])+'%');
+ let score=55 + brand*.18 + perf*.16 + retail*.08 - disc*.28 - Math.abs(brand-perf)*.05;
+ score=Math.max(10,Math.min(95,score));
+ document.getElementById('mixScore').textContent=Math.round(score)+'/100';
+ document.getElementById('mixMeter').style.width=score+'%';
+ const pill=document.getElementById('mixPill');
+ if(score>=72){pill.className='pill green';pill.textContent='Value-creating mix';}
+ else if(score>=52){pill.className='pill orange';pill.textContent='Needs testing';}
+ else{pill.className='pill red';pill.textContent='Margin risk';}
+ document.getElementById('customerEffect').textContent = brand>perf ? 'Builds awareness and preference, especially useful for premium products.' : 'Prioritizes near-term conversion and measurable online demand.';
+ document.getElementById('financialEffect').textContent = disc>30 ? 'May lift volume but can pressure margins and weaken pricing power.' : 'More likely to support profitable demand if conversion data confirms lift.';
+ document.getElementById('mainRisk').textContent = disc>30 ? 'Customers may wait for promotions instead of buying at full price.' : perf<15 ? 'Too little measurable conversion data; harder to prove ROI.' : 'Execution risk: the campaign must turn attention into full-price sales.';
+ document.getElementById('nextAction').textContent = score>=72 ? 'Scale gradually and track sales, margin, and repeat purchase behavior.' : score>=52 ? 'Run an A/B test before scaling the plan.' : 'Redesign the plan toward higher-quality demand and less discounting.';
+}
+function updateSectorAdvice(){
+ const v=document.getElementById('sectorType').value;
+ const map={
+  premium:['Recommended posture: protect brand equity first, then add performance ads around product launches and high-margin categories. Do not let discount-heavy advertising train customers to wait for markdowns.',['Track full-price sell-through, not just revenue.','Use athlete/product storytelling to defend pricing power.','Increase spend only where margins stay healthy.','Report cash impact alongside brand metrics.']],
+  mass:['Recommended posture: be more efficiency-driven. Advertising should be tied to conversion, inventory movement, and customer retention because margins are usually thinner.',['Set a strict payback period for each campaign.','Avoid broad awareness spend without sales evidence.','Watch inventory and markdown exposure closely.','Use regional tests before national rollouts.']],
+  dtc:['Recommended posture: invest in performance marketing, but monitor customer acquisition cost carefully. Growth is attractive only if customers repeat and spend enough over time.',['Compare acquisition cost with repeat purchase value.','Shift budget to channels with profitable retention.','Use email/app/community to reduce dependence on paid ads.','Do not chase growth that requires permanent ad inflation.']],
+  turnaround:['Recommended posture: do not simply outspend the problem. Fix product, pricing, and channel issues while using advertising to communicate the reset.',['Diagnose whether the issue is demand, product relevance, or price.','Test campaigns in the strongest categories first.','Protect cash until evidence of profitable demand appears.','Use advertising to support a clearer brand story.']]
+ };
+ document.getElementById('sectorAdvice').textContent=map[v][0];
+ document.getElementById('sectorChecklist').innerHTML=map[v][1].map(x=>`<li>${x}</li>`).join('');
+}
+function updateEvidence(){
+ const revChange=(base.revenue-data[1].revenue)/data[1].revenue;
+ const demandChange=(base.demand-data[1].demand)/data[1].demand;
+ const incomeChange=(base.income-data[1].income)/data[1].income;
+ const payout=base.dividends/base.income;
+ document.getElementById('evDemand').textContent=`${fmt(base.demand)} (${pct(demandChange)} vs FY2024)`;
+ document.getElementById('evRevenue').textContent=`${fmt(base.revenue)} (${pct(revChange)} vs FY2024)`;
+ document.getElementById('evIncome').textContent=`${fmt(base.income)} (${pct(incomeChange)} vs FY2024)`;
+ document.getElementById('evDividend').textContent=`Dividends were about ${pct(payout)} of net income`;
+}
+
+function copySummary(){
+ const text=`Nike advertising case study: FY2025 demand creation spending rose to ${fmt(base.demand)}, while revenue declined to ${fmt(base.revenue)} and net income declined to ${fmt(base.income)}. Recommendation: increase advertising only in campaigns that prove profitable demand, pricing power, and cash generation.`;
+ navigator.clipboard?.writeText(text);
+ document.getElementById('copyNote').textContent='Executive summary copied.';
+}
+['extraSpend','salesLift','marginEffect','payout'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updateSim()}));
+['beSpend','beMargin','beConfidence'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updateBreakEven()}));
+['brandMix','perfMix','retailMix','discMix'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updateMix()}));
+metricCards(); buildChain(); score(); fillTable(); updateSim(); updateBreakEven(); updateMix(); updateSectorAdvice(); updateEvidence();
+</script>
+</body>
+</html>
